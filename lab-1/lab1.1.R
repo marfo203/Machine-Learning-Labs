@@ -185,8 +185,6 @@ crossEntropy = function(X, X1){
   return (-loss)
 }
 
-
-
 for (n in 1:30) {
   ml = kknn(as.factor(train[ ,ncol(train)])~. , train, validation, k=n, kernel = "rectangular")
   
@@ -201,8 +199,4 @@ min(accuracyVector)
 which.min(accuracyVector)
 
 # Testing #############################
-
-
-
-
 
