@@ -6,14 +6,14 @@ library(ggplot2)
 # function of the voice characteristics, and since the data are scaled, no
 # intercept is needed in the modelling.
 
-data = read.csv("parkinsons.csv")
-set.seed(12345)
-n = nrow(data)
-trainId = sample(1:n, floor(n*0.6))
-train = data[trainId, ]
-test = data[-trainId, ]
+data = read.csv("parkinsons.csv") # Reading the input data
+set.seed(12345) # Setting the seed so that we get the same answers as other groups.
+n = nrow(data) # Extracting the number of rows in data.
+trainId = sample(1:n, floor(n*0.6)) # Dividing the 60% into training data. 
+train = data[trainId, ] # Assigning the training data.
+test = data[-trainId, ] # Assigning the test data.
 
-
+# Scaling the data
 scaler=preProcess(train)
 trainS=predict(scaler,train)
 testS=predict(scaler,test)
