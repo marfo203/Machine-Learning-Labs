@@ -7,6 +7,8 @@ library(ggplot2)
 # intercept is needed in the modelling.
 
 data = read.csv("parkinsons.csv") # Reading the input data
+hist(data$motor_UPDRS) # Checking the data distribution
+plot(density(data$motor_UPDRS)) # Checking the data distribution
 set.seed(12345) # Setting the seed so that we get the same answers as other groups.
 n = nrow(data) # Extracting the number of rows in data.
 trainId = sample(1:n, floor(n*0.6)) # Dividing the 60% into training data. 
@@ -17,7 +19,11 @@ test = data[-trainId, ] # Assigning the test data.
 scaler=preProcess(train)
 trainS=predict(scaler,train)
 testS=predict(scaler,test)
+<<<<<<< Updated upstream
 data
+=======
+hist(trainS$motor_UPDRS)
+>>>>>>> Stashed changes
 
 # 2. Compute a linear regression model from the training data, estimate training
 # and test MSE and comment on which variables contribute significantly to the model.
@@ -42,9 +48,18 @@ sorted_coef
 # 3. Implement 4 following functions by using basic R commands only (noexternal packages):
 
 # Loglikelihood
-loglikelihood = function(vector, dispersion) {
-  
+# This function is not done.
+loglikelihood = function(theta, sigma) {
+  n = nrow(trainS)
+  beta = theta[1]
+  sigma_2 = sigma^2
+  e = Y - beta * X 
+  loglik = 0.5 * n * log(2 * pi) - 0.5*n*log(sigma_2) - (t(e) %*% e) / (2 * sigma_2)
+  return(-loglik)
 }
+summary(fit)
+?logLik()
+logLik(fit)
 
 # Ridge
 
