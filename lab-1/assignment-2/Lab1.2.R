@@ -17,26 +17,27 @@ test = data[-trainId, ] # Assigning the test data.
 scaler=preProcess(train)
 trainS=predict(scaler,train)
 testS=predict(scaler,test)
-data
 
 # 2. Compute a linear regression model from the training data, estimate training
 # and test MSE and comment on which variables contribute significantly to the model.
 
-# Comupte linear regression
+# Compute linear regression
 fit=lm(motor_UPDRS~., data=trainS)
 summary(fit)
 
 # Estimate training Mean Squared Error(MSE)
 train_MSE = mean((trainS$motor_UPDRS - predict.lm(fit, trainS))^2)
+train_MSE
 
 # Estimate test MSE
 test_MSE =  mean((testS$motor_UPDRS - predict.lm(fit, testS))^2)
+test_MSE
 
 # Which values contribute significantly to the model
 summary = summary(fit)
 coef = as.data.frame(summary$coefficients)
 coef$Estimate
-sorted_coef = coef[order(-coef$Estimate),]
+sorted_coef = coef[order(-abs(coef$Estimate)),]
 sorted_coef
 
 # 3. Implement 4 following functions by using basic R commands only (noexternal packages):
