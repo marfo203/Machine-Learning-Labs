@@ -19,14 +19,9 @@ test = data[-trainId, ] # Assigning the test data.
 scaler=preProcess(train)
 trainS=predict(scaler,train)
 testS=predict(scaler,test)
-<<<<<<< HEAD
-<<<<<<< Updated upstream
 data
-=======
 hist(trainS$motor_UPDRS)
->>>>>>> Stashed changes
-=======
->>>>>>> 1ef7d268beb5a46ccd3ff546b1a0e1a5f78e39b7
+
 
 # 2. Compute a linear regression model from the training data, estimate training
 # and test MSE and comment on which variables contribute significantly to the model.
