@@ -18,19 +18,6 @@ valid = data[id2, ]
 id3 = setdiff(id1, id2)
 test = data[id3, ]
 
-####### Previous solution
-trainId = sample(1:n, floor(n*0.5))
-train = data[trainId, ]
-notTrain = data[-trainId,]
-
-n=nrow(notTrain)
-
-testId = sample(1:n, floor(n*0.5))
-test = notTrain[testId, ]
-validation = notTrain[-testId, ]
-########
-
-
 # 2.
 library(kknn)
 # Missclassification 
