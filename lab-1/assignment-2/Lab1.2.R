@@ -7,19 +7,20 @@ library(ggplot2)
 # intercept is needed in the modelling.
 
 data = read.csv("parkinsons.csv") # Reading the input data
-hist(data$motor_UPDRS) # Checking the data distribution
-plot(density(data$motor_UPDRS)) # Checking the data distribution
+data_frame = data.frame(data[c(5,7:22)])
+hist(data_frame$motor_UPDRS) # Checking the data distribution
+plot(density(data_frame$motor_UPDRS)) # Checking the data distribution
 set.seed(12345) # Setting the seed so that we get the same answers as other groups.
-n = nrow(data) # Extracting the number of rows in data.
+n = nrow(data_frame) # Extracting the number of rows in data.
 trainId = sample(1:n, floor(n*0.6)) # Dividing the 60% into training data. 
-train = data[trainId, ] # Assigning the training data.
-test = data[-trainId, ] # Assigning the test data.
+train = data_frame[trainId, ] # Assigning the training data.
+test = data_frame[-trainId, ] # Assigning the test data.
 
 # Scaling the data
 scaler=preProcess(train)
 trainS=predict(scaler,train)
 testS=predict(scaler,test)
-data
+data_frame
 hist(trainS$motor_UPDRS)
 
 
@@ -29,6 +30,7 @@ hist(trainS$motor_UPDRS)
 # Compute linear regression
 fit=lm(motor_UPDRS~., data=trainS)
 summary(fit)
+plot(fit)
 
 # Estimate training Mean Squared Error(MSE)
 train_MSE = mean((trainS$motor_UPDRS - predict.lm(fit, trainS))^2)
@@ -46,29 +48,44 @@ sorted_coef = coef[order(-abs(coef$Estimate)),]
 sorted_coef
 
 # 3. Implement 4 following functions by using basic R commands only (noexternal packages):
-
+X = trainS[,-1]
+Y = trainS[,1]  
 # Loglikelihood
-# This function is not done.
 loglikelihood = function(theta, sigma) {
   n = nrow(trainS)
   beta = theta[1]
-  sigma_2 = sigma^2
+  sigmaSquared = sigma^2
   e = Y - beta * X 
-  loglik = 0.5 * n * log(2 * pi) - 0.5*n*log(sigma_2) - (t(e) %*% e) / (2 * sigma_2)
+  loglik = 0.5 * n * log(2 * pi) - 0.5*n*log(sigmaSquared) - ((t(e) %*% e) / (2 * sigmaSquared))
   return(-loglik)
 }
-summary(fit)
-?logLik()
-logLik(fit)
 
 # Ridge
-
+ridge = function(theta, sigma, lambda) {
+  ridge = (lambda*sum(theta^2) - loglikelihood(theta, sigma))
+  return(ridge)
+}
 
 # RidgeOpt
-
+# function that depends on scalar 𝜆, uses function from 3b and function optim() 
+# with method=”BFGS” to find the optimal 𝜽 and 𝜎 for the given 𝜆.
+ridgeOpt = function(lambda) {
+  ridge_opt = optim(X, fn=ridge, lambda=lambda, method="BFGS")
+  return(ridge_opt)
+}
 
 # DF
+# function that for a given scalar 𝜆 computes the degrees of freedom 
+# of the Ridge model based on the training data.
+# Formula: X(X^t*X + lambda*I)^-1 * X^t
+I = diag(n)
+df = function(lambda) {
+  df = X %*% (t(X)%*%X + lambda*I)^-1 %*% t(X) 
+  return(df)
+}
 
+# 4 By using function RidgeOpt, compute optimal 𝜽 parameters for 
+# 𝜆 = 1, 𝜆 = 100 and 𝜆 = 1000.
 
 
 
