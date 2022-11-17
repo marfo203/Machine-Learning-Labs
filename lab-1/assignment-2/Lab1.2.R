@@ -7,12 +7,11 @@ library(ggplot2)
 # intercept is needed in the modelling.
 
 data = read.csv("parkinsons.csv") # Reading the input data
+
 data_frame = data.frame(data[c(5,7:22)]) # Stripping data of columns subject, age, sex, test_time, total_UPDRS
+
 hist(data_frame$motor_UPDRS) # Checking the data distribution
 plot(density(data_frame$motor_UPDRS)) # Checking the data distribution
-
-#str(data)
-#data_frame
 
 set.seed(12345) # Setting the seed so that we get the same answers as other groups.
 n = nrow(data_frame) # Extracting the number of rows in data.
@@ -33,19 +32,17 @@ hist(trainS$motor_UPDRS)
 # Compute linear regression
 fit=lm(motor_UPDRS~., data=trainS)
 summary(fit)
-#plot(fit)
 
 # Histogram data follows noraml distr.
 hist(fit$residuals, main='Histogram of residuals', ylab='residuals')
 
 # Estimate training Mean Squared Error(MSE)
-train_MSE = mean(((predict(fit, trainS)) - trainS$motor_UPDRS)^2)
+train_MSE = mean((trainS$motor_UPDRS - (predict(fit, trainS)))^2)
 print(paste("MSE train: ", train_MSE))
 
 # Estimate test MSE
-test_MSE = mean(((predict(fit, testS)) - testS$motor_UPDRS)^2)
+test_MSE = mean((testS$motor_UPDRS - (predict(fit, testS)))^2)
 print(paste("MSE test: ", test_MSE))
-
 
 # Which values contribute significantly to the model
 summary = summary(fit)
@@ -65,7 +62,7 @@ n_col = ncol(trainS)
 loglikelihood = function(theta, sigma) {
   sigmaSquared = sigma^2
   e = Y - X %*% theta
-  loglik = 0.5 * n * log(2 * pi) - 0.5*n*log(sigmaSquared) - ((t(e) %*% e) / (2 * sigmaSquared))
+  loglik = 0.5*n*log(2*pi) - 0.5*n*log(sigmaSquared) - ( (t(e) %*% e) / (2*sigmaSquared) )
   return(loglik)
 }
 
@@ -84,26 +81,22 @@ ridgeOpt = function(lambda) {
   ridge_opt = optim(rep(1, 17), fn=ridge, lambda=lambda, method="BFGS")
   return(ridge_opt)
 }
+
 # DF
 # function that for a given scalar 𝜆 computes the degrees of freedom 
 # of the Ridge model based on the training data.
 # Formula: X(X^t*X + lambda*I)^-1 * X^t
 df = function(lambda) {
   Z = as.matrix(diag(lambda, 16, 16))
-  # print(Z)
-  df = X %*% ((t(X)%*%X) + Z)^-1 %*% t(X)
-  return(tr(df))
+  df = X %*% solve( t(X)%*%X + Z ) %*% t(X)
+  return(sum(diag(df)))
 }
 
 # 4 By using function RidgeOpt, compute optimal 𝜽 parameters for 
 #𝜆=1, 𝜆=100 and 𝜆=1 000.
-
 ridge1 = ridgeOpt(1)
-ridge1$par[1:16] #theta
-ridge1$par[17] #sigma
 ridge100 = ridgeOpt(100)
 ridge1000 = ridgeOpt(1000)
-
 
 # Predict motor_UPDRS
 XTrain = as.matrix(trainS[,-1])
@@ -118,14 +111,21 @@ testPred100 = XTest %*% ridge100$par[1:16]
 trainPred1000 = XTrain %*% ridge1000$par[1:16]
 testPred1000 = XTest %*% ridge1000$par[1:16]
 
-mseTrain1 = mean((trainPred1 - Y)^2)
-mseTest1 = mean((testPred1 - YTest)^2)
-df(1)
+# Calculate training and test MSE value. Also degrees of freedom for the models
+mseTrain1 = mean((YTrain - trainPred1)^2)
+mseTest1 = mean((YTest - testPred1)^2)
+df1 = df(1)
+print("𝜆=1")
+print(paste("MSE train:", mseTrain1, "MSE test:", mseTest1, "Degrees of freedom:", df1))
 
-mseTrain100 = mean((trainPred100 - Y)^2)
-mseTest100 = mean((testPred100 - YTest)^2)     
-df(100)
+mseTrain100 = mean((YTrain - trainPred100)^2)
+mseTest100 = mean((YTest - testPred100)^2)     
+df100 = df(100)
+print("𝜆=100")
+print(paste("MSE train:", mseTrain100, "MSE test:", mseTest100, "Degrees of freedom:", df100))
 
-mseTrain1000 = mean((trainPred1000 - Y)^2)    
-mseTest1000 = mean((testPred1000 - YTest)^2)
-df(1000)
+mseTrain1000 = mean((YTrain - trainPred1000)^2)    
+mseTest1000 = mean((YTest - testPred1000)^2)
+df1000 = df(1000)
+print("𝜆=1000")
+print(paste("MSE train:", mseTrain1000, "MSE test:", mseTest1000, "Degrees of freedom:", df1000))
