@@ -3,10 +3,21 @@
 # 1. 
 data = read.csv2("bank-full.csv") # We use read.csv2 since the delimitor is ";"
 data = as.data.frame(data%>%select(-duration))
-
-# Converting yes to 1 and no to 0 in y column.
+# Converting 'yes and 'character' no to factor
+# I need to find out how to not have to do this manually!
 data$y = as.factor(data$y)
+data$job = as.factor(data$job)
+data$marital = as.factor(data$marital)
+data$education = as.factor(data$education)
+data$default = as.factor(data$default)
+data$housing = as.factor(data$housing)
+data$loan = as.factor(data$loan)
+data$contact = as.factor(data$contact)
+data$month = as.factor(data$month)
+data$poutcome = as.factor(data$poutcome)
 
+type <- sapply(data,class)
+type
 # Dividing the data into train, valid and test
 library(dplyr)
 set.seed(12345)
@@ -30,10 +41,10 @@ fit = tree(y~., data=train)
 summary(fit)
 
 # Misclassification rate training
-Yfit = predict(fit, train)
+Yfit = predict(fit, newdata = train, type = "class")
 
 # Misclassification rate test
-Yfit = predict(fit, newdata = test)
+Yfit = predict(fit, newdata = test, type = "class")
 
 # b. Decision Tree with smallest allowed node size equal to 7000.
 
