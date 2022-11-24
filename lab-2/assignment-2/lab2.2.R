@@ -48,9 +48,9 @@ missclass.matrix = table(train$y, Yfit)
 missclass.rate = 1 - sum(diag(missclass.matrix)) / sum(missclass.matrix)
 print(paste("Missclassification rate for training data: ", missclass.rate))
 
-# Misclassification rate test
-Yfit = predict(fit, newdata = test, type = "class")
-missclass.matrix = table(test$y, Yfit)
+# Misclassification rate validation
+Yfit = predict(fit, newdata = valid, type = "class")
+missclass.matrix = table(valid$y, Yfit)
 missclass.rate = 1 - sum(diag(missclass.matrix)) / sum(missclass.matrix)
 print(paste("Missclassification rate for training data: ", missclass.rate))
 
@@ -64,9 +64,9 @@ missclass.matrix = table(train$y, Yfit)
 missclass.rate = 1 - sum(diag(missclass.matrix)) / sum(missclass.matrix)
 print(paste("Missclassification rate for training data: ", missclass.rate))
 
-# Misclassification rate test
-Yfit = predict(fit, newdata = test, type = "class")
-missclass.matrix = table(test$y, Yfit)
+# Misclassification rate validation
+Yfit = predict(fit, newdata = valid, type = "class")
+missclass.matrix = table(valid$y, Yfit)
 missclass.rate = 1 - sum(diag(missclass.matrix)) / sum(missclass.matrix)
 print(paste("Missclassification rate for training data: ", missclass.rate))
 
@@ -80,13 +80,15 @@ missclass.matrix = table(train$y, Yfit)
 missclass.rate = 1 - sum(diag(missclass.matrix)) / sum(missclass.matrix)
 print(paste("Missclassification rate for training data: ", missclass.rate))
 
-# Misclassification rate test
-Yfit = predict(fit, newdata = test, type = "class")
-missclass.matrix = table(test$y, Yfit)
+# Misclassification rate validation
+Yfit = predict(fit, newdata = valid, type = "class")
+missclass.matrix = table(valid$y, Yfit)
 missclass.rate = 1 - sum(diag(missclass.matrix)) / sum(missclass.matrix)
 print(paste("Missclassification rate for training data: ", missclass.rate))
 
 # 3. 
+
+
 
 # 4. 
 
