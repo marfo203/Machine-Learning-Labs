@@ -39,28 +39,52 @@ library(tree)
 # a. Decision Tree with default settings. 
 fit = tree(y~., data=train)
 summary(fit)
+plot(fit)
+text(fit, pretty = 0)
 
 # Misclassification rate training
 Yfit = predict(fit, newdata = train, type = "class")
+missclass.matrix = table(train$y, Yfit)
+missclass.rate = 1 - sum(diag(missclass.matrix)) / sum(missclass.matrix)
+print(paste("Missclassification rate for training data: ", missclass.rate))
 
 # Misclassification rate test
 Yfit = predict(fit, newdata = test, type = "class")
+missclass.matrix = table(test$y, Yfit)
+missclass.rate = 1 - sum(diag(missclass.matrix)) / sum(missclass.matrix)
+print(paste("Missclassification rate for training data: ", missclass.rate))
 
 # b. Decision Tree with smallest allowed node size equal to 7000.
+?tree
+fit = tree(y~., data=train, control = tree.control(nrow(train), minsize = 7000))
 
 # Misclassification rate training
-Yfit = predict(fit, newdata = train)
+Yfit = predict(fit, newdata = train, type = "class")
+missclass.matrix = table(train$y, Yfit)
+missclass.rate = 1 - sum(diag(missclass.matrix)) / sum(missclass.matrix)
+print(paste("Missclassification rate for training data: ", missclass.rate))
 
 # Misclassification rate test
-Yfit = predict(fit, newdata = test)
+Yfit = predict(fit, newdata = test, type = "class")
+missclass.matrix = table(test$y, Yfit)
+missclass.rate = 1 - sum(diag(missclass.matrix)) / sum(missclass.matrix)
+print(paste("Missclassification rate for training data: ", missclass.rate))
+
 
 # c. Decision trees minimum deviance to 0.0005.
+fit = tree(y~., data=train, control = tree.control(nrow(train), mindev = 0.0005))
 
 # Misclassification rate training
-Yfit = predict(fit, newdata = train)
+Yfit = predict(fit, newdata = train, type = "class")
+missclass.matrix = table(train$y, Yfit)
+missclass.rate = 1 - sum(diag(missclass.matrix)) / sum(missclass.matrix)
+print(paste("Missclassification rate for training data: ", missclass.rate))
 
 # Misclassification rate test
-Yfit = predict(fit, newdata = test)
+Yfit = predict(fit, newdata = test, type = "class")
+missclass.matrix = table(test$y, Yfit)
+missclass.rate = 1 - sum(diag(missclass.matrix)) / sum(missclass.matrix)
+print(paste("Missclassification rate for training data: ", missclass.rate))
 
 # 3. 
 
