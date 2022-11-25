@@ -1,9 +1,11 @@
 # install.packages("tree")
 
 # 1. 
-data = read.csv2("bank-full.csv") # We use read.csv2 since the delimitor is ";"
+data = read.csv2("bank-full.csv", stringsAsFactors = TRUE) # We use read.csv2 since the delimitor is ";"
+?read.csv2()
 data = as.data.frame(data%>%select(-duration))
-# Converting 'yes and 'character' no to factor
+str(data) # Checking the types of the data
+# Converting character into factor
 # I need to find out how to not have to do this manually!
 data$y = as.factor(data$y)
 data$job = as.factor(data$job)
@@ -16,8 +18,6 @@ data$contact = as.factor(data$contact)
 data$month = as.factor(data$month)
 data$poutcome = as.factor(data$poutcome)
 
-type <- sapply(data,class)
-type
 # Dividing the data into train, valid and test
 library(dplyr)
 set.seed(12345)
@@ -52,12 +52,14 @@ print(paste("Missclassification rate for training data: ", missclass.rate))
 Yfit = predict(fit, newdata = valid, type = "class")
 missclass.matrix = table(valid$y, Yfit)
 missclass.rate = 1 - sum(diag(missclass.matrix)) / sum(missclass.matrix)
-print(paste("Missclassification rate for training data: ", missclass.rate))
+print(paste("Missclassification rate for validation data: ", missclass.rate))
 
 # b. Decision Tree with smallest allowed node size equal to 7000.
 ?tree
 fit = tree(y~., data=train, control = tree.control(nrow(train), minsize = 7000))
-
+summary(fit) # This is the best one, same misclassification rate but a smaller less complex model.
+plot(fit)
+text(fit, pretty = 0)
 # Misclassification rate training
 Yfit = predict(fit, newdata = train, type = "class")
 missclass.matrix = table(train$y, Yfit)
@@ -68,11 +70,14 @@ print(paste("Missclassification rate for training data: ", missclass.rate))
 Yfit = predict(fit, newdata = valid, type = "class")
 missclass.matrix = table(valid$y, Yfit)
 missclass.rate = 1 - sum(diag(missclass.matrix)) / sum(missclass.matrix)
-print(paste("Missclassification rate for training data: ", missclass.rate))
+print(paste("Missclassification rate for validation data: ", missclass.rate))
 
 
 # c. Decision trees minimum deviance to 0.0005.
 fit = tree(y~., data=train, control = tree.control(nrow(train), mindev = 0.0005))
+plot(fit)
+text(fit, pretty = 0)
+summary(fit)
 
 # Misclassification rate training
 Yfit = predict(fit, newdata = train, type = "class")
@@ -84,15 +89,44 @@ print(paste("Missclassification rate for training data: ", missclass.rate))
 Yfit = predict(fit, newdata = valid, type = "class")
 missclass.matrix = table(valid$y, Yfit)
 missclass.rate = 1 - sum(diag(missclass.matrix)) / sum(missclass.matrix)
-print(paste("Missclassification rate for training data: ", missclass.rate))
+print(paste("Missclassification rate for validation data: ", missclass.rate))
 
 # 3. 
-
-
+fit = tree(y~., data=train, control = tree.control(nrow(train), mindev = 0.0005))
+trainScore=rep(0,49)
+testScore=rep(0,49)
+for(i in 2:50) {
+  prunedTree=prune.tree(fit,best=i)
+  pred=predict(prunedTree, newdata=valid, type="tree")
+  trainScore[i-1]=deviance(prunedTree)
+  testScore[i-1]=deviance(pred)
+}
+plot(2:50, trainScore[2:50], type="b", col="red", ylim=c(8000,12000))
+points(2:50, testScore[2:50], type="b", col="blue")
+plot(2:50, testScore[2:50], type="b", col="blue")
+min(testScore)
+which.min(testScore) # 21 nodes is king
 
 # 4. 
+finalTree=prune.tree(fit, best=21)
+Yfit=predict(finalTree, newdata=test, type="class")
+missclass.matrix = table(test$y, Yfit)
+missclass.rate = 1 - sum(diag(missclass.matrix)) / sum(missclass.matrix)
+print(paste("Missclassification rate for test data: ", missclass.rate))
+print(paste("Accuracy for test data: ", 1 - missclass.rate))
+
+# F1 = 2 * (Precision * Recall) / (Precision + Recall)
+library(caret)
+precision(missclass.matrix)
+# Precision = True Positive / (True Positive + False Positive)
+F1.precision = missclass.matrix[2,2] / (missclass.matrix[2,2] + missclass.matrix[1,2]) 
+# Recall = True Positive / (True Positive + False Negative)
+F1.recall = missclass.matrix[2,2] / (missclass.matrix[2,2] + missclass.matrix[2,1]) 
+F1 = 2 * (F1.precision * F1.recall) / (F1.precision + F1.recall) # Good on predicting no, bad on predicting yes
 
 # 5. 
+?tree
+fit = tree(y~., data=train) 
 
 # 6. 
 
