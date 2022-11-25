@@ -117,6 +117,26 @@ accuracyVectorValid ### 3, 9, 10, 11
 min(accuracyVectorValid)
 which.min(accuracyVectorValid)
 
+ml = kknn(as.factor(train[ ,ncol(train)])~. , train, valid, k=3, kernel = "rectangular")
+ ml
+ Pred=ml$fitted.values
+Pred
+summar(ml)
+
+# Missclassification rate Test
+ml = kknn(as.factor(test[ ,ncol(test)])~. , test, test, k=10, kernel = "rectangular")
+Pred=ml$fitted.values
+Pred
+table((test[ ,ncol(test)]), Pred)
+
+missclass = function(X, X1){
+  n = length(X)
+  return(1 - sum(diag(table(X, X1)))/n)
+  
+}
+missclass((test[ ,ncol(test)]), Pred) # Missclassification rate for train data
+
+
 # Missclassification rate train
 ml = kknn(as.factor(train[ ,ncol(train)])~. , train, train, k=10, kernel = "rectangular")
 Pred=ml$fitted.values

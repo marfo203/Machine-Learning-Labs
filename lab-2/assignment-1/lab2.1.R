@@ -1,5 +1,5 @@
-# install.packages("glmnet")
-# install.packages("ggplot2")
+install.packages("glmnet")
+install.packages("ggplot2")
 
 data = read.csv("tecator.csv")
 
