@@ -125,9 +125,10 @@ F1.recall = missclass.matrix[2,2] / (missclass.matrix[2,2] + missclass.matrix[2,
 F1 = 2 * (F1.precision * F1.recall) / (F1.precision + F1.recall) # Good on predicting no, bad on predicting yes
 
 # 5. 
-?tree
-fit = tree(y~., data=train) 
-
+fit = tree(y~., data=train, control = tree.control(nrow(train), mindev = 0.0005)) # Should we do a normal fit?
+loss.matrix = matrix(c(0, 1,  5, 0), nrow = 2)
+prune.tree(fit, loss = )
+loss.matrix
 # 6. 
 
 
