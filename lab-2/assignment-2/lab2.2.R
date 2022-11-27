@@ -111,6 +111,7 @@ which.min(testScore) # 21 nodes is king
 finalTree=prune.tree(fit, best=21)
 Yfit=predict(finalTree, newdata=test, type="class")
 missclass.matrix = table(test$y, Yfit)
+missclass.matrix
 missclass.rate = 1 - sum(diag(missclass.matrix)) / sum(missclass.matrix)
 print(paste("Missclassification rate for test data: ", missclass.rate))
 print(paste("Accuracy for test data: ", 1 - missclass.rate))
@@ -125,11 +126,16 @@ F1.recall = missclass.matrix[2,2] / (missclass.matrix[2,2] + missclass.matrix[2,
 F1 = 2 * (F1.precision * F1.recall) / (F1.precision + F1.recall) # Good on predicting no, bad on predicting yes
 
 # 5. 
-fit = tree(y~., data=train, control = tree.control(nrow(train), mindev = 0.0005)) # Should we do a normal fit?
-loss.matrix = matrix(c(0, 1,  5, 0), nrow = 2)
-prune.tree(fit, loss = )
+fit = tree(y~., data=train, control = tree.control(nrow(train), mindev = 0.0005), loss = loss.matrix) # Should we do a normal fit?
+loss.matrix = matrix(c(0, 1,  5, 0), nrow = 2, byrow=TRUE)
+finalTree = prune.misclass(fit, loss = loss.matrix, best = 21)
+summary(finalTree)
+Yfit = predict(finalTree, newdata = test, type = "class")
+confusion.matrix = table(test$y, Yfit)
+confusion.matrix
 loss.matrix
 # 6. 
+
 
 
 
