@@ -29,7 +29,7 @@ print(paste("MSE train: ", train_MSE))
 test_MSE = mean((test$Fat - (predict(fit, test)))^2)
 print(paste("MSE test: ", test_MSE))
 
-# Bad quality!
+# Bad quality! Overfitted!
 
 # 2.
 library(glmnet)
@@ -49,7 +49,7 @@ for (n in 101:260) {
 }
 library(ggplot2)
 plot(plotVector)
-which(plotVector %in% c(3))
+which(plotVector %in% c(3)) # lambda = log(200/100), log(248/100)
 
 # 4.
 plotVector = vector("numeric")
