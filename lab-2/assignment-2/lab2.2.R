@@ -134,13 +134,25 @@ Yfit = predict(finalTree, newdata = test, type = "class")
 confusion.matrix = table(test$y, Yfit)
 confusion.matrix
 loss.matrix
+Yfit
 # 6. 
+fit = tree(y~., data=train, control = tree.control(nrow(train), mindev = 0.0005))
+finalTree=prune.tree(fit, best=21)
+Yfit=predict(finalTree, newdata=test)
+r = 0.05
+while (r < 1) {
+Pred = sapply(Yfit[, 2], function(x) ifelse(x > r, 'yes', 'no'))
+confusion.matrix = table(test$y, Pred)
+confusion.matrix
+# TPR True positive rate
+TPR = c(TPR, confusion.matrix[2,2])
+# FPR False positive rate
+FPR = c(FPR, confusion.matrix[1,2])
+r = r + 0.05
+}
 
-
-
-
-
-
+# ROC, Y = TPR, X = FPR
+plot(FPR, TPR)
 
 
 
