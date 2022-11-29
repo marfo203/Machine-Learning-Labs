@@ -157,9 +157,9 @@ while (r < 1) {
   # FPR False positive rate - FPR = FP / (TN + FP)
   FPR = c(FPR, confusion.matrix[1,2] / (confusion.matrix[1,1] + confusion.matrix[1,2]))
   # Precision
-  precision = c(precision, missclass.matrix[2,2] / (missclass.matrix[2,2] + missclass.matrix[1,2]))
+  precision = c(precision, confusion.matrix[2,2] / (confusion.matrix[2,2] + confusion.matrix[1,2]))
   # Recall
-  recall = c(recall, missclass.matrix[2,2] / (missclass.matrix[2,2] + missclass.matrix[2,1]))
+  recall = c(recall, confusion.matrix[2,2] / (confusion.matrix[2,2] + confusion.matrix[2,1]))
   r = r + 0.05
 }
 
