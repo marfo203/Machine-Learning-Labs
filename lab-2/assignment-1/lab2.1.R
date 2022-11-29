@@ -1,7 +1,9 @@
 install.packages("glmnet")
 install.packages("ggplot2")
+install.packages("dplyr")
 
 data = read.csv("tecator.csv")
+library(dplyr)
 
 # Divide data randomly into train and test (50/50) by using the codes from the
 # lectures
@@ -35,31 +37,56 @@ print(paste("MSE test: ", test_MSE))
 library(glmnet)
 x = as.matrix(train%>%select(-Fat))
 y = as.matrix(train%>%select(Fat))
-lasso = glmnet(x, y, family="gaussian", lambda = 1, alpha = 1)
+lasso = glmnet(x, y, family="gaussian", alpha = 1)
+
+#lasso = cv.glmnet(x, y, family="gaussian", alpha = 1)
+plot(lasso)
+
 # Cost function squared error p.g.a. att vi kör gaussion.
+
 coef(lasso)
 # Linear regression model: Fat = -12 + 9,7 * Channel41
 # Cost function: min theta = MSE + lambda * (12+9)
 
 # 3.
-plotVector = vector("numeric")
-for (n in 101:260) {
-  lasso = glmnet(x, y, family="gaussian", lambda = log(n/100), alpha = 1)
-  plotVector = c(plotVector, lasso$df)
-}
-library(ggplot2)
-plot(plotVector)
-which(plotVector %in% c(3))
+library(caret)
+x = as.matrix(train%>%select(-Fat))
+y = as.matrix(train%>%select(Fat))
+lasso = glmnet(x, y, family="gaussian", alpha = 1)
+
+
+plot(lasso, xvar="lambda", label=TRUE, xlim=c(-0.345,-0.09))
+
+print(lasso)
 
 # 4.
-plotVector = vector("numeric")
-for (n in 1:1000) {
-  ridge = glmnet(x, y, family="gaussian", lambda = log(1), alpha = 0)
-  plotVector = c(plotVector, ridge$df)
-}
-library(ggplot2)
-plot(plotVector)
-which(plotVector %in% c(3))
+x = as.matrix(train%>%select(-Fat))
+y = as.matrix(train%>%select(Fat))
+lasso = glmnet(x, y, family="gaussian", alpha = 0)
+
+
+plot(lasso, xvar="lambda", label=TRUE, xlim=c(8,10), ylim=c(-0.05,0.05))
+
+print(lasso)
 
 
 # 5.
+ #först här ska cv användas
+lassoCV = cv.glmnet(x, y, family="gaussian", alpha=1)
+plot(lassoCV)
+coef(lassoCV, s="lambda.min")
+
+log(lassoCV$lambda.min) #omptimal lambda
+nice = lassoCV$lambda.min
+
+lasso = glmnet(x, y, family="gaussian", alpha = 1, lambda = nice)
+
+newx = as.matrix(test%>%select(-Fat))
+newy = as.matrix(test%>%select(Fat))
+
+plot(predict(lasso, newx), col = "green")
+points(newy, col = "red")
+
+
+
+
