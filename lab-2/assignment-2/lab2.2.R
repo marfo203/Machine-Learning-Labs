@@ -2,8 +2,7 @@
 
 # 1. 
 data = read.csv2("bank-full.csv", stringsAsFactors = TRUE) # We use read.csv2 since the delimitor is ";"
-?read.csv2()
-data = as.data.frame(data%>%select(-duration))
+data = as.data.frame(data%>%select(-duration)) # Removing duration.
 str(data) # Checking the types of the data
 # Converting character into factor
 # I need to find out how to not have to do this manually!
@@ -18,7 +17,7 @@ data$contact = as.factor(data$contact)
 data$month = as.factor(data$month)
 data$poutcome = as.factor(data$poutcome)
 
-# Dividing the data into train, valid and test
+# 1. Dividing the data into train, valid and test
 library(dplyr)
 set.seed(12345)
 n=nrow(data)
@@ -93,22 +92,22 @@ print(paste("Missclassification rate for validation data: ", missclass.rate))
 
 # 3. 
 fit = tree(y~., data=train, control = tree.control(nrow(train), mindev = 0.0005))
-trainScore=rep(0,49)
-testScore=rep(0,49)
+trainScore=rep(0,50)
+validScore=rep(0,50)
 for(i in 2:50) {
   prunedTree=prune.tree(fit,best=i)
   pred=predict(prunedTree, newdata=valid, type="tree")
-  trainScore[i-1]=deviance(prunedTree)
-  testScore[i-1]=deviance(pred)
+  trainScore[i]=deviance(prunedTree)
+  validScore[i]=deviance(pred)
 }
 plot(2:50, trainScore[2:50], type="b", col="red", ylim=c(8000,12000))
-points(2:50, testScore[2:50], type="b", col="blue")
-plot(2:50, testScore[2:50], type="b", col="blue")
-min(testScore)
-which.min(testScore) # 21 nodes is king
+points(2:50, validScore[2:50], type="b", col="blue")
+plot(2:50, validScore[2:50], type="b", col="blue")
+min(validScore[2:50])
+which.min(validScore[2:50]) # index 21 --> 21 + 1 = 22 leaves are best.
 
 # 4. 
-finalTree=prune.tree(fit, best=21)
+finalTree=prune.tree(fit, best=22)
 Yfit=predict(finalTree, newdata=test, type="class")
 missclass.matrix = table(test$y, Yfit)
 missclass.matrix
@@ -124,11 +123,11 @@ F1.precision = missclass.matrix[2,2] / (missclass.matrix[2,2] + missclass.matrix
 # Recall = True Positive / (True Positive + False Negative)
 F1.recall = missclass.matrix[2,2] / (missclass.matrix[2,2] + missclass.matrix[2,1]) 
 F1 = 2 * (F1.precision * F1.recall) / (F1.precision + F1.recall) # Good on predicting no, bad on predicting yes
-
+F1 # F1 score is better than accuracy if 
 # 5. 
 fit = tree(y~., data=train, control = tree.control(nrow(train), mindev = 0.0005), loss = loss.matrix) # Should we do a normal fit?
 loss.matrix = matrix(c(0, 1,  5, 0), nrow = 2, byrow=TRUE)
-finalTree = prune.misclass(fit, loss = loss.matrix, best = 21)
+finalTree = prune.misclass(fit, loss = loss.matrix, best = 22)
 summary(finalTree)
 Yfit = predict(finalTree, newdata = test, type = "class")
 confusion.matrix = table(test$y, Yfit)
@@ -137,22 +136,36 @@ loss.matrix
 Yfit
 # 6. 
 fit = tree(y~., data=train, control = tree.control(nrow(train), mindev = 0.0005))
-finalTree=prune.tree(fit, best=21)
+finalTree=prune.tree(fit, best=22)
 Yfit=predict(finalTree, newdata=test)
+TPR = vector("numeric")
+FPR = vector("numeric")
+recall = vector("numeric")
+precision = vector("numeric")
 r = 0.05
 while (r < 1) {
-Pred = sapply(Yfit[, 2], function(x) ifelse(x > r, 'yes', 'no'))
-confusion.matrix = table(test$y, Pred)
-confusion.matrix
-# TPR True positive rate
-TPR = c(TPR, confusion.matrix[2,2])
-# FPR False positive rate
-FPR = c(FPR, confusion.matrix[1,2])
-r = r + 0.05
+  Pred = sapply(Yfit[, 2], function(x) ifelse(x > r, 'yes', 'no'))
+  confusion.matrix = table(test$y, Pred)
+  confusion.matrix
+  if (ncol(confusion.matrix) == 1) {
+    confusion.matrix = cbind(confusion.matrix, c(0,0))
+    colnames(confusion.matrix)[2] <- 'yes'
+  }
+  confusion.matrix
+  # TPR True positive rate - TPR = TP / (TP + FN)
+  TPR = c(TPR, confusion.matrix[2,2] / (confusion.matrix[2,2] + confusion.matrix[2,1]))
+  # FPR False positive rate - FPR = FP / (TN + FP)
+  FPR = c(FPR, confusion.matrix[1,2] / (confusion.matrix[1,1] + confusion.matrix[1,2]))
+  # Precision
+  precision = c(precision, missclass.matrix[2,2] / (missclass.matrix[2,2] + missclass.matrix[1,2]))
+  # Recall
+  recall = c(recall, missclass.matrix[2,2] / (missclass.matrix[2,2] + missclass.matrix[2,1]))
+  r = r + 0.05
 }
 
 # ROC, Y = TPR, X = FPR
 plot(FPR, TPR)
+plot(recall, precision)
 
 
 
