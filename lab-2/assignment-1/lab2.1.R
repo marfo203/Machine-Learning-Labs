@@ -40,7 +40,8 @@ y = as.matrix(train%>%select(Fat))
 lasso = glmnet(x, y, family="gaussian", alpha = 1)
 
 #lasso = cv.glmnet(x, y, family="gaussian", alpha = 1)
-plot(lasso)
+plot(lasso, xvar = "lambda")
+abline(v=-0.2)
 
 # Cost function squared error p.g.a. att vi kör gaussion.
 
@@ -55,7 +56,7 @@ y = as.matrix(train%>%select(Fat))
 lasso = glmnet(x, y, family="gaussian", alpha = 1)
 
 
-plot(lasso, xvar="lambda", label=TRUE, xlim=c(-0.345,-0.09))
+plot(lasso, xvar="lambda", label=TRUE, xlim=c(-0.5,-0.00))
 
 print(lasso)
 
@@ -65,20 +66,21 @@ y = as.matrix(train%>%select(Fat))
 lasso = glmnet(x, y, family="gaussian", alpha = 0)
 
 
-plot(lasso, xvar="lambda", label=TRUE, xlim=c(8,10), ylim=c(-0.05,0.05))
-
+plot(lasso, xvar="lambda", label=TRUE, xlim=c(8.5,9), ylim=c(-0.02,0.05))
+# All variables goes to 0 at the same time. 
+plot(lasso, xvar="lambda", label=TRUE, xlim=c(8.702,8.703), ylim=c(0,0.001))
 print(lasso)
 
 
 # 5.
  #först här ska cv användas
 lassoCV = cv.glmnet(x, y, family="gaussian", alpha=1)
-plot(lassoCV)
-coef(lassoCV, s="lambda.min")
+plot(lassoCV) # Biggger lambda, worse fit to training data.
+coef(lassoCV, s="lambda.min") # 8 + intercept
 
-log(lassoCV$lambda.min) #omptimal lambda
-nice = lassoCV$lambda.min
-
+log(lassoCV$lambda.min) #optimal lambda
+nice = lassoCV$lambda.min # Optimal lambda = 0.057
+# Less complex model that is less overfitted but performs as well as log lambda = -4.
 lasso = glmnet(x, y, family="gaussian", alpha = 1, lambda = nice)
 
 newx = as.matrix(test%>%select(-Fat))
