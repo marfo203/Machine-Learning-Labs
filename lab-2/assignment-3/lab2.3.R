@@ -102,6 +102,20 @@ autoplot(prin.comp, data=dataS2, colour='ViolentCrimesPerPop')
 # Reading the input data
 data <- read.csv("communities.csv")
 
+###################### Scaling and centering the data.
+communities = as.data.frame(scale(data, center = TRUE, scale = TRUE))
+set.seed(12345) 
+
+# Extracting the number of rows in data.
+n <- nrow(communities)
+# Dividing the 50% into training data.
+trainId = sample(1:n, floor(n*0.5))
+# Assigning the training data.
+trainS = communities[trainId, ]
+# Assigning the test data.
+testS = communities[-trainId, ]
+#####################
+##################### Scaling but not centering the data
 # Setting the seed so that we get the same answers as other groups.
 set.seed(12345) 
 
@@ -118,6 +132,7 @@ test = data[-trainId, ]
 scaler=preProcess(train)
 trainS=predict(scaler,train)
 testS=predict(scaler,test)
+#############################
 
 fit=lm(ViolentCrimesPerPop~., data=trainS)
 summary(fit)
@@ -151,9 +166,8 @@ costLinReg <- function(theta){
   train.cost = sum( ((train.x%*%theta) - train.y )^2)/(nrow(train.x))
   test.cost = sum( ((test.x%*%theta) - test.y )^2)/(nrow(test.x))
   
-  test.vector<<- c(test.vector, test.cost)
-  
   train.vector<<- c(train.vector, train.cost)
+  test.vector<<- c(test.vector, test.cost)
   
   return (train.cost);
 }
@@ -169,16 +183,12 @@ theta.opt <- optim(theta.0, fn=costLinReg, method="BFGS")
 
 plot(test.vector[-(0:500)], ylim=c(0,1), xlim=c(-5,5000))
 points(train.vector[-(0:500)], col="blue")
-abline(v=1682)
+abline(v=1683)
 
 which.min(test.vector)
 
-test.vector[2182]
-train.vector[2182]
-
-
-
-
+train.vector[2183] # 0.2858249
+test.vector[2183] # 0.3769468
 
 theta.opt$par
 
