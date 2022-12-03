@@ -5,17 +5,6 @@ data = read.csv2("bank-full.csv", stringsAsFactors = TRUE) # We use read.csv2 si
 data = as.data.frame(data%>%select(-duration)) # Removing duration.
 str(data) # Checking the types of the data
 # Converting character into factor
-# I need to find out how to not have to do this manually!
-data$y = as.factor(data$y)
-data$job = as.factor(data$job)
-data$marital = as.factor(data$marital)
-data$education = as.factor(data$education)
-data$default = as.factor(data$default)
-data$housing = as.factor(data$housing)
-data$loan = as.factor(data$loan)
-data$contact = as.factor(data$contact)
-data$month = as.factor(data$month)
-data$poutcome = as.factor(data$poutcome)
 
 # 1. Dividing the data into train, valid and test
 library(dplyr)
@@ -54,7 +43,6 @@ missclass.rate = 1 - sum(diag(missclass.matrix)) / sum(missclass.matrix)
 print(paste("Missclassification rate for validation data: ", missclass.rate))
 
 # b. Decision Tree with smallest allowed node size equal to 7000.
-?tree
 fit = tree(y~., data=train, control = tree.control(nrow(train), minsize = 7000))
 summary(fit) # This is the best one, same misclassification rate but a smaller less complex model.
 plot(fit)
@@ -108,6 +96,9 @@ which.min(validScore[2:50]) # index 21 --> 21 + 1 = 22 leaves are best.
 
 # 4. 
 finalTree=prune.tree(fit, best=22)
+summary(finalTree)
+plot(finalTree)
+text(finalTree, pretty = 0)
 Yfit=predict(finalTree, newdata=test, type="class")
 missclass.matrix = table(test$y, Yfit)
 missclass.matrix
@@ -117,7 +108,6 @@ print(paste("Accuracy for test data: ", 1 - missclass.rate))
 
 # F1 = 2 * (Precision * Recall) / (Precision + Recall)
 library(caret)
-precision(missclass.matrix)
 # Precision = True Positive / (True Positive + False Positive)
 F1.precision = missclass.matrix[2,2] / (missclass.matrix[2,2] + missclass.matrix[1,2]) 
 # Recall = True Positive / (True Positive + False Negative)
@@ -130,10 +120,20 @@ loss.matrix = matrix(c(0, 1,  5, 0), nrow = 2, byrow=TRUE)
 finalTree = prune.misclass(fit, loss = loss.matrix, best = 22)
 summary(finalTree)
 Yfit = predict(finalTree, newdata = test, type = "class")
-confusion.matrix = table(test$y, Yfit)
-confusion.matrix
-loss.matrix
-Yfit
+missclass.matrix = table(test$y, Yfit)
+missclass.matrix
+
+missclass.rate = 1 - sum(diag(missclass.matrix)) / sum(missclass.matrix)
+print(paste("Missclassification rate for test data: ", missclass.rate))
+print(paste("Accuracy for test data: ", 1 - missclass.rate))
+
+# Precision = True Positive / (True Positive + False Positive)
+F1.precision = missclass.matrix[2,2] / (missclass.matrix[2,2] + missclass.matrix[1,2]) 
+# Recall = True Positive / (True Positive + False Negative)
+F1.recall = missclass.matrix[2,2] / (missclass.matrix[2,2] + missclass.matrix[2,1]) 
+F1 = 2 * (F1.precision * F1.recall) / (F1.precision + F1.recall) # Good on predicting no, bad on predicting yes
+F1 # F1 score is better than accuracy if 
+
 # 6. 
 fit = tree(y~., data=train, control = tree.control(nrow(train), mindev = 0.0005))
 finalTree=prune.tree(fit, best=22)
