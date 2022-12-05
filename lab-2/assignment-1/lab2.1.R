@@ -31,7 +31,7 @@ print(paste("MSE train: ", train_MSE))
 test_MSE = mean((test$Fat - (predict(fit, test)))^2)
 print(paste("MSE test: ", test_MSE))
 
-# Bad quality!
+# Bad quality! Overfitted!
 
 # 2.
 library(glmnet)

@@ -15,7 +15,7 @@ set.seed(12345)
 
 
 
-data = read.csv("pima-indians-diabetes.csv")
+data = read.csv("pima-indians-diabetes.csv", header=FALSE)
 data
 
 #Part 1: Scatter plot for plasma glucose concentration on age. Each scatter colored on Diabetes level
@@ -23,7 +23,7 @@ data
 PlasmaGlucose = data[,2]
 Age = data[,8]
 
-plot(Age, PlasmaGlucose, col=as.factor(data$X1))
+plot(Age, PlasmaGlucose, col=as.factor(data[,9]), main = "Scatterplot of dataframe")
 legend(x = "topright", legend=c("Diabetes", "No Diabetes"), col=c("red", "black"), pch=c(1))
 
 
@@ -31,13 +31,6 @@ legend(x = "topright", legend=c("Diabetes", "No Diabetes"), col=c("red", "black"
 #as features. Make prediction using r = 0,5 as classification thresh
 
 
-data.num = select(data,X6, X148, X72, X35,  X0, X33.6, X0.627, X50, X1)
-data.num
-
-#make varible columns numeric
-data.num$X50 = as.numeric(data.num$X50)
-data.num$X148 = as.numeric(data.num$X148)
-data.num$X1 = as.numeric(data.num$X1)
 
 set.seed(12345)
 n=nrow(data)
@@ -47,36 +40,32 @@ test = data[-id,]
 
 
 
-
-
 #Creating model with glm (generalized linear model)
-model=glm(as.factor(train$X1) ~ train$X50 + train$X148, data = train, family="binomial")
-Prob = predict(model, train, type="response")
-
-
+model=glm(as.factor(data[,9]) ~ data[,8] + data[,2], data = data, family="binomial")
+Prob = predict(model, data, type="response")
 
 #threshholv 0.5 and factors 0 and 1
 Pred = sapply(Prob, function(x) ifelse(x<0.5, 0 , 1))
 
-confusion.matrix = table(train$X1, Pred)
+confusion.matrix = table(data[,9], Pred)
 confusion.matrix
 
 #Missclassification
-print(sum(diag(confusion.matrix))/sum(confusion.matrix))
+print(1-sum(diag(confusion.matrix))/sum(confusion.matrix))
 
 summary(model)
 
-#probabilittic model (P(diabetes = true) = 1 / 1 +  exp^(-5.959 + 0.0210X50 + 0.03665X148)) given from summary 
+#probabilittic model (P(diabetes = true) = 1 / 1 +  exp^(-5.91244 + 0.02477 * X8 + 0.035644 * X2)) given from summary 
 
 
 #Plotting the model predictions
 
 
-PlasmaGlucose = train[,2]
-Age = train[,8]
+PlasmaGlucose = data[,2]
+Age = data[,8]
 
-plot(Age, PlasmaGlucose, col=as.factor(train$X1)) #In the plot the red ones are the true diabetes, not the model
-#To get scappet plot with colors on prediciton, remove train$X1 and apply only Pred
+plot(Age, PlasmaGlucose, col=as.factor(Pred), main="Scatterplot of prediction") #In the plot the red ones are the true diabetes, not the model
+#To get scappet plot with colors on prediciton, remove train[,9] and apply only Pred
 
 legend(x = "topright", legend=c("Diabetes", "No Diabetes"), col=c("red", "black"), pch=c(1))
 
@@ -85,24 +74,24 @@ legend(x = "topright", legend=c("Diabetes", "No Diabetes"), col=c("red", "black"
 
 #3: Use step 2 to calculate equation of the decition boundary between the two classes.
 # theta0 + theta1 x1 + theta2 x2 = 0 -->
-coef(model)
-head(train)
-k = coef(model)[2]/(-coef(model)[3])
-m=coef(model)[1] / (-coef(model)[3])
 
-coef(model)[2]
+k = -coef(model)[2]/(coef(model)[3])
+m= -coef( model)[1] / (coef(model)[3])
+
 
 
 lines(abline(m, k))
-# plasma = -162.589 + 0.597747age
+# plasma = 162.589 - 0.597747age
 
 
 
 # 4: plotting with r = 0,2 and r = 0,8
 
 # r = 0,2
-model=glm(as.factor(train$X1) ~ train$X50 + train$X148, data = train, family="binomial")
-Prob = predict(model, train, type="response")
+model=glm(as.factor(data[,9]) ~ data[,8] + data[,2], data = data, family="binomial")
+Prob = predict(model, data, type="response")
+
+summary(model)
 
 r1 = 0.2
 r2 = 0.8
@@ -111,12 +100,14 @@ r2 = 0.8
 Pred1 = sapply(Prob, function(x) ifelse(x<r1, 0 , 1))
 Pred2 = sapply(Prob, function(x) ifelse(x<r2, 0 , 1))
 
-confusion.matrix1 = table(train$X1, Pred1)
-confusion.matrix2 = table(train$X1, Pred2)
+summary(pred1)
+
+confusion.matrix1 = table(data[,9], Pred1)
+confusion.matrix2 = table(data[,9], Pred2)
 
 #Missclassification
-cat("Missclass, r = 0.2: ",  sum(diag(confusion.matrix1))/sum(confusion.matrix1))
-cat("Missclass, r = 0.8: ",  sum(diag(confusion.matrix2))/sum(confusion.matrix2))
+cat("Missclass, r = 0.2: ", 1- sum( diag(confusion.matrix1))/sum(confusion.matrix1))
+cat("Missclass, r = 0.8: ", 1- sum( diag(confusion.matrix2))/sum(confusion.matrix2))
 
 summary(model)
 
@@ -126,16 +117,50 @@ summary(model)
 #Plotting the model predictions
 
 
-PlasmaGlucose = train[,2]
-Age = train[,8]
+PlasmaGlucose = data[,2]
+Age = data[,8]
 
-plot(Age, PlasmaGlucose, col=as.factor(Pred)) #In the plot the red ones are the true diabetes, not the model
+
+plot(Age, PlasmaGlucose, col=as.factor(Pred1), main = "Scatterplot with r=0.2")
+legend(x = "topright", legend=c("Diabetes", "No Diabetes"), col=c("red", "black"), pch=c(1))
+
+plot(Age, PlasmaGlucose, col=as.factor(Pred2), main = "Scatterplot with r=0.8") 
 legend(x = "topright", legend=c("Diabetes", "No Diabetes"), col=c("red", "black"), pch=c(1))
 
 
-model=glm(as.factor(train$X1) ~ train$X50 + train$X148, data = train, family="binomial")
-Prob = predict(model, train, type="response")
+# 5: Basis Function Expansion, add them to dataset and perform logistic regression
 
 
+#plasma = -162.589 + 0.597747age from part 3
 
+x1 = data[,2]
+x2 = data[,8]
+
+
+z1 = x1^4
+z2 = (x1^3)*x2
+z3 = (x1^2)*x2^2
+z4 = x1*x2^3
+z5 = x2^4
+
+data$z1 = z1
+data$z2 = z2
+data$z3 = z3
+data$z4 = z4
+data$z5 = z5
+
+model=glm(as.factor(data[,9]) ~ data$V2+ data$V8+ z1 + z2 + z3 + z4 + z5, data = data, family="binomial")
+Prob = predict(model, data, type="response")
+
+Pred = sapply(Prob, function(x) ifelse(x<0.5, 0 , 1))
+
+PlasmaGlucose = data[,2]
+Age = data[,8]
+
+
+plot(Age, PlasmaGlucose, col=as.factor(Pred), main = "Scatterplot using basis expansion trick") #In the plot the red ones are the true diabetes, not the model
+legend(x = "topright", legend=c("Diabetes", "No Diabetes"), col=c("red", "black"), pch=c(1))
+
+confusion.matrix = table(data[,9], Pred)
+cat("Classification for Basis function expanstion ", 1- sum(diag(confusion.matrix))/sum(confusion.matrix))
 
