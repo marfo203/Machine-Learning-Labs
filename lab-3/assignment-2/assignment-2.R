@@ -30,31 +30,35 @@ mailtype <- predict(filter0,va[,-58])
 t <- table(mailtype,va[,58])
 err0 <- (t[1,2]+t[2,1])/sum(t)
 err0
+t
 
 filter1 <- ksvm(type~.,data=tr,kernel="rbfdot",kpar=list(sigma=0.05),C=which.min(err_va)*by,scaled=FALSE)
 mailtype <- predict(filter1,te[,-58])
 t <- table(mailtype,te[,58])
 err1 <- (t[1,2]+t[2,1])/sum(t)
 err1
+t
 
 filter2 <- ksvm(type~.,data=trva,kernel="rbfdot",kpar=list(sigma=0.05),C=which.min(err_va)*by,scaled=FALSE)
 mailtype <- predict(filter2,te[,-58])
 t <- table(mailtype,te[,58])
 err2 <- (t[1,2]+t[2,1])/sum(t)
 err2
+t
 
 filter3 <- ksvm(type~.,data=spam,kernel="rbfdot",kpar=list(sigma=0.05),C=which.min(err_va)*by,scaled=FALSE)
 mailtype <- predict(filter3,te[,-58])
 t <- table(mailtype,te[,58])
 err3 <- (t[1,2]+t[2,1])/sum(t)
 err3
-
+t
 # Questions
 
 # 1. Which filter do we return to the user ? filter0, filter1, filter2 or filter3? Why?
-?ksvm
+
 
 # 2. What is the estimate of the generalization error of the filter returned to the user? err0, err1, err2 or err3? Why?
+
 
 # 3. Implementation of SVM predictions.
 
