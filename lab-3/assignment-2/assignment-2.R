@@ -77,6 +77,7 @@ filter3 <- ksvm(type~.,data=spam,kernel="rbfdot",kpar=list(sigma=0.05),C=which.m
 # err0 -> Error when training on the training set and predicting on the validation set.
 # err1 -> Error when training on the training set and predicting on the test set.
 # err2 -> Error when training on the training + validation set and predicting on the test set.
+# err3 -> Error when training on the whole data set and predicting on the test set. 
 
 # 3. Implementation of SVM predictions.
 
