@@ -83,26 +83,23 @@ t
 # err3 -> Error when training on the whole data set and predicting on the test set. The error is quite low since we train the model on the whole data set and then use that data to test the model. 0.02122347
 
 # 3. Implementation of SVM predictions.
-?alphaindex
 sv<-alphaindex(filter3)[[1]]
-sv
 co<-coef(filter3)[[1]]
 co
 inte<- - b(filter3)
-inte
+rbf <- rbfdot(sigma = 0.05) # Used to produce the kernel function with the same sigma as above.
 k<-NULL
 for(i in 1:10) { # We produce predictions for just the first 10 points in the dataset.
-  k2<-NULL
+  k2<-0 # NULL does not work when doing the addition below. Then it returns a numeric(0) all of the time.
   for(j in 1:length(sv)) {
-    k2<- c(k2, co[j] * sv[i] )
+    k2 <- k2 + co[j] * rbf(unlist(spam[sv[j], -58]) # The training data
+                           , unlist(spam[i, -58] # The test data that we want to predict on.
+                                    )) # alpha * kernel for each element.
   }
-  k<-c(k, sum(k2) + inte)
+  k<-c(k, k2 + inte) # Adding the intercept to the prediction. 
 }
-k
-?spam
-?kernel
-?unlist
-?apply
+k # The sign on k can be used for classification. Positive values are spam and negative nonspam.
+
 predict(filter3,spam[1:10,-58], type = "decision")
 
 
