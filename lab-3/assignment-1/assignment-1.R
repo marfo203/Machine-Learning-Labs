@@ -20,9 +20,13 @@ temp <- vector(length=length(times))
 # Students’ code here
 plot(temp, type="o")
 
+
+# Gaussian Kernel = k(u) = exp(-||u||^2), u = (x* - x) / h
+
 # Kernel 1
 # The first to account for the physical distance from a station to the point of interest.
 # For this purpose, use the function distHaversine from the R package geosphere.
+?distHaversine
 
 # Kernel 2
 # The second to account for the distance between the day a temperature measurement
