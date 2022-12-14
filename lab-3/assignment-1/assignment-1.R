@@ -11,13 +11,13 @@ st <- merge(stations,temps,by="station_number")
 # Kernel weight factors
 h_distance <- 100000 # These three values are up to the students
 h_date <- 15 # These three values are up to the students
-h_time <- 10 # These three values are up to the students
+h_time <- 2 # These three values are up to the students
 
 # The data we want to make predictions on.
 a <- 58.4274 # The point to predict (up to the students)
 b <- 14.826 # The point to predict (up to the students)
 point <- c(b,a) # It is b,a since it is closer to our measurements.
-date <- "2013-11-04" # The date to predict (up to the students)
+date <- "2013-01-31" # The date to predict (up to the students)
 times <- c("04:00:00", "06:00:00", "08:00:00", "10:00:00", "12:00:00", "14:00:00", 
            "16:00:00", "18:00:00", "20:00:00", "22:00:00", "24:00:00")
 temp <- vector(length=length(times))
@@ -38,6 +38,7 @@ rm.posterior.data = function() {
 # The first to account for the physical distance from a station to the point of interest.
 # For this purpose, use the function distHaversine from the R package geosphere.
 ?distHaversine
+
 distance.kernel = function(h) {
   current.data <<- rm.posterior.data()
   distance <<- distHaversine(point, as.matrix(select(current.data, longitude, latitude)))
@@ -73,6 +74,11 @@ time.kernel = function(time.of.interest, h) {
   current.data <- rm.posterior.data()
   time <- as.numeric(difftime(as.POSIXct(current.data$time, format = "%H:%M:%S"), 
                               as.POSIXct(time.of.interest, format = "%H:%M:%S"), units = "hours"))
+  
+  time[which(abs(time)>12)] = 24 - 24 - 
+    abs(time[which(abs(time)>12)])
+  
+ 
   u <- time / h
   return(exp(-u^2))
 }
@@ -89,14 +95,17 @@ kernel.product.prediction <- NULL
 for (time in times) {
   # Summing Kernels
   kernel.sum <- distance.kernel(h_distance) + date.kernel(h_date) + time.kernel(time, h_time)
+  time.kernel(time, h_time)
   kernel.sum.result <- sum(kernel.sum * current.data$air_temperature)/sum(kernel.sum)
   kernel.sum.prediction <- c(kernel.sum.prediction, c(kernel.sum.result))
+  
+  
   # Multiplying Kernels
   kernel.product <- distance.kernel(h_distance) * date.kernel(h_date) * time.kernel(time, h_time)
-  print(distance.kernel(h_distance))
+  #print(distance.kernel(h_distance))
   #print(date.kernel(h_date))
   #print(time.kernel(time, h_time))
-  kernel.product.result <- sum(kernel.product * as.numeric(current.data$air_temperature))/sum(kernel.product)
+  kernel.product.result <- sum(kernel.product %*% (current.data$air_temperature))/sum(kernel.product)
   kernel.product.prediction <- c(kernel.product.prediction, c(kernel.product.result))
 }
 kernel.sum.prediction
