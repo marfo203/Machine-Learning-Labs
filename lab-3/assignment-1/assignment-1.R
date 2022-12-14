@@ -16,13 +16,14 @@ h_time <- 10 # These three values are up to the students
 # The data we want to make predictions on.
 a <- 58.4274 # The point to predict (up to the students)
 b <- 14.826 # The point to predict (up to the students)
-point <- c(a,b)
+point <- c(b,a) # It is b,a since it is closer to our measurements.
 date <- "2013-11-04" # The date to predict (up to the students)
 times <- c("04:00:00", "06:00:00", "08:00:00", "10:00:00", "12:00:00", "14:00:00", 
            "16:00:00", "18:00:00", "20:00:00", "22:00:00", "24:00:00")
 temp <- vector(length=length(times))
 # Students’ code here
 plot(temp, type="o")
+
 
 # Remove posterior data
 rm.posterior.data = function() {
@@ -38,21 +39,21 @@ rm.posterior.data = function() {
 # For this purpose, use the function distHaversine from the R package geosphere.
 ?distHaversine
 distance.kernel = function(h) {
-  current.data <- rm.posterior.data()
-  distance <- distHaversine(point, as.matrix(select(current.data, longitude, latitude)))
+  current.data <<- rm.posterior.data()
+  distance <<- distHaversine(point, as.matrix(select(current.data, longitude, latitude)))
   u <- distance / h
   return(exp(-u^2))
 }
 test = distance.kernel(100000)
 # We want values close to 1 for close points and values close to 0 for distant points.
-plot(distance <- distHaversine(point, as.matrix(select(current.data, longitude, latitude))), test)
+plot(distance, test)
 
 # Kernel 2
 # The second to account for the distance between the day a temperature measurement
 # was made and the day of interest.
 date.kernel = function(h) {
   current.data <- rm.posterior.data()
-  number.of.days <- function (x) {
+  number.of.days <<- function (x) {
     return(difftime(as.Date(date), as.Date(x), units = "days"))
   }  
   days <- unlist(lapply(current.data$date, FUN = number.of.days))
@@ -75,7 +76,7 @@ time.kernel = function(time.of.interest, h) {
   u <- time / h
   return(exp(-u^2))
 }
-time.of.interest <- "04:00:00"
+time.of.interest <- "12:00:00"
 test = time.kernel(time.of.interest, 10)
 # We want values close to 1 for close points and values close to 0 for distant points.
 plot(time <- as.numeric(difftime(as.POSIXct(current.data$time, format = "%H:%M:%S"),
@@ -89,21 +90,22 @@ for (time in times) {
   # Summing Kernels
   kernel.sum <- distance.kernel(h_distance) + date.kernel(h_date) + time.kernel(time, h_time)
   kernel.sum.result <- sum(kernel.sum * current.data$air_temperature)/sum(kernel.sum)
-  print("SUM")
-  print(kernel.sum.result)
   kernel.sum.prediction <- c(kernel.sum.prediction, c(kernel.sum.result))
   # Multiplying Kernels
   kernel.product <- distance.kernel(h_distance) * date.kernel(h_date) * time.kernel(time, h_time)
-  print(kernel.product)
+  print(distance.kernel(h_distance))
+  #print(date.kernel(h_date))
+  #print(time.kernel(time, h_time))
   kernel.product.result <- sum(kernel.product * as.numeric(current.data$air_temperature))/sum(kernel.product)
-  print("Prod")
-  print(kernel.product.result)
   kernel.product.prediction <- c(kernel.product.prediction, c(kernel.product.result))
 }
 kernel.sum.prediction
 kernel.product.prediction
 plot(kernel.sum.prediction)
 plot(kernel.product.prediction)
-current.data$air_temperature
-sum(1 * current.data$air_temperature)
+
+test = as.numeric(current.data$air_temperature)
+test
+st[st$date == "2013-11-04", ]
+temps[temps$date == "2013-11-04", ]
 
