@@ -75,7 +75,7 @@ time.kernel = function(time.of.interest, h) {
   time <- as.numeric(difftime(as.POSIXct(current.data$time, format = "%H:%M:%S"), 
                               as.POSIXct(time.of.interest, format = "%H:%M:%S"), units = "hours"))
   
-  time[which(abs(time)>12)] = 24 - 24 - abs(time[which(abs(time)>12)])
+  time[which(abs(time)>12)] = 24 - abs(time[which(abs(time)>12)])
   u <- time / h
   return(exp(-u^2))
 }
