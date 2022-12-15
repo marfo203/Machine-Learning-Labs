@@ -75,10 +75,7 @@ time.kernel = function(time.of.interest, h) {
   time <- as.numeric(difftime(as.POSIXct(current.data$time, format = "%H:%M:%S"), 
                               as.POSIXct(time.of.interest, format = "%H:%M:%S"), units = "hours"))
   
-  time[which(abs(time)>12)] = 24 - 24 - 
-    abs(time[which(abs(time)>12)])
-  
- 
+  time[which(abs(time)>12)] = 24 - 24 - abs(time[which(abs(time)>12)])
   u <- time / h
   return(exp(-u^2))
 }
@@ -99,12 +96,8 @@ for (time in times) {
   kernel.sum.result <- sum(kernel.sum * current.data$air_temperature)/sum(kernel.sum)
   kernel.sum.prediction <- c(kernel.sum.prediction, c(kernel.sum.result))
   
-  
   # Multiplying Kernels
   kernel.product <- distance.kernel(h_distance) * date.kernel(h_date) * time.kernel(time, h_time)
-  #print(distance.kernel(h_distance))
-  #print(date.kernel(h_date))
-  #print(time.kernel(time, h_time))
   kernel.product.result <- sum(kernel.product %*% (current.data$air_temperature))/sum(kernel.product)
   kernel.product.prediction <- c(kernel.product.prediction, c(kernel.product.result))
 }
