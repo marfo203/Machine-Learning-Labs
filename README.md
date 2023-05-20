@@ -2,7 +2,7 @@
 
 The repository contains the labs from the Machine learning course given for masters students at Linköping university.
 
-##Lab partners
+###Lab partners
 Martin Forsberg, Erik Larsson, Max Wallhem
 
 
